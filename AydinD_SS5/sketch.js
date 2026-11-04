@@ -1,11 +1,11 @@
 let serial;
-let mode = "PULSE";      // "PULSE" or "FOLLOW"
-let brightness = 0;      // 0-255, what the LED gets
+let mode = "PULSE";      
+let brightness = 0;      
 let phase = 0;           // animation phase for pulse + wave
 let connectBtn, modeBtn;
 
 function setup() {
-  createCanvas(640, 480);   // within 400-1080 x 400-720
+  createCanvas(640, 480);   
   textFont("monospace");
 
   serial = createSerial();
@@ -23,7 +23,7 @@ function draw() {
   background(20, 24, 34);
   phase += 0.04;
 
-  //compute brightness depending on mode 
+
   if (mode === "PULSE") {
     brightness = (sin(phase) * 0.5 + 0.5) * 255;           // breathing
   } else {
@@ -31,7 +31,7 @@ function draw() {
   }
   brightness = round(brightness);
 
-  //send to hardware (only when connected) 
+ 
   if (serial.opened()) {
     serial.write(brightness + "\n");
   }
