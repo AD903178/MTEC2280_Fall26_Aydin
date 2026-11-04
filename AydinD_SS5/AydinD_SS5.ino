@@ -1,46 +1,35 @@
 const int LED_PIN = 9;
-const int PWM_FREQ = 5000;  
-const int PWM_BITS = 8;      
+const unsigned long TIMEOUT_MS = 2000;   // LED turns off if p5 goes quiet
 
-String line = "";
+unsigned long lastMessage = 0;
 
-void setLED(int value) {
+void setBrightness(int value) {
   value = constrain(value, 0, 255);
-#if defined(ESP32)
-  #if ESP_ARDUINO_VERSION_MAJOR >= 3
-    ledcWrite(LED_PIN, value);          
-  #else
-    ledcWrite(0, value);                
-  #endif
-#else
-  analogWrite(LED_PIN, value);
-#endif
+  ledcWrite(LED_PIN, value);
 }
 
 void setup() {
   Serial.begin(9600);
-#if defined(ESP32)
-  #if ESP_ARDUINO_VERSION_MAJOR >= 3
-    ledcAttach(LED_PIN, PWM_FREQ, PWM_BITS);
-  #else
-    ledcSetup(0, PWM_FREQ, PWM_BITS);
-    ledcAttachPin(LED_PIN, 0);
-  #endif
-#else
-  pinMode(LED_PIN, OUTPUT);
-#endif
-  setLED(0);
+  ledcAttach(LED_PIN, 5000, 8);    
+
+  // Power-up self test that fade up and down once to confirm the wiring
+  for (int i = 0; i <= 255; i += 5) { setBrightness(i); delay(8); }
+  for (int i = 255; i >= 0; i -= 5) { setBrightness(i); delay(8); }
+
+  lastMessage = millis();
 }
 
 void loop() {
-  // Read characters until newline, then parse the number.
-  while (Serial.available() > 0) {
-    char c = Serial.read();
-    if (c == '\n') {
-      if (line.length() > 0) setLED(line.toInt());
-      line = "";
-    } else if (c != '\r') {
-      line += c;
+  if (Serial.available() > 0) {
+    String text = Serial.readStringUntil('\n');
+    text.trim();
+    if (text.length() > 0) {
+      setBrightness(text.toInt());
+      lastMessage = millis();
     }
+  }
+
+  if (millis() - lastMessage > TIMEOUT_MS) {
+    setBrightness(0);
   }
 }
