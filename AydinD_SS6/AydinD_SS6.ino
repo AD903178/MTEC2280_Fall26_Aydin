@@ -24,7 +24,7 @@ void loop() {
     line.trim();
 
     int r, g, b;
-    if (sscanf(line.c_str(), "%d,%d,%d", &r, &g, &b) == 3) { //got this online 
+    if (sscanf(line.c_str(), "%d,%d,%d", &r, &g, &b) == 3) { //got this online; decimal integer 
       analogWrite(LED_PINS[0], constrain(r, 0, 255));
       analogWrite(LED_PINS[1], constrain(g, 0, 255));
       analogWrite(LED_PINS[2], constrain(b, 0, 255));
